@@ -8,5 +8,4 @@ urllib3
 scikit-image
 pandas
 argparse
-os
 math
