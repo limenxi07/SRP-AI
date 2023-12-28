@@ -18,11 +18,12 @@ import torch.nn.functional as F
 import torch.autograd as autograd
 import torch
 
-DESTINATION = 'images/F_wgan_results'
-ANNOTATIONS = 'images/trainingset.csv'
-PATH = 'images/E_square_training_set'
+DESTINATION = '../results/wgan_results'
+ANNOTATIONS = '../images/trainingset.csv'
+PATH = '../images/E_square_training_set'
+N_IMAGES = 50
 
-os.makedirs("images", exist_ok=True)
+os.makedirs(DESTINATION, exist_ok=True)
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--n_epochs", type=int, default=200, help="number of epochs of training")
@@ -212,6 +213,8 @@ for epoch in range(opt.n_epochs):
                 % (epoch, opt.n_epochs, i, len(dataloader), d_loss.item(), g_loss.item())
             )
 
-            save_image(fake_imgs.data[:25], DESTINATION + "/%d.png" % batches_done, nrow=5, normalize=True)
+            if epoch == opt.n_epochs:
+                for i in range(N_IMAGES):
+                  save_image(fake_imgs.data[i:i+1], DESTINATION + f'/wgan-{i}.png', normalize=True)
 
             batches_done += opt.n_critic
