@@ -212,7 +212,7 @@ for epoch in range(opt.n_epochs):
                 % (epoch, opt.n_epochs, i, len(dataloader), d_loss.item(), g_loss.item())
             )
 
-            if epoch == opt.n_epochs:
+            if epoch == opt.n_epochs - 1:
                 for i in range(N_IMAGES):
                   save_image(fake_imgs.data[i:i+1], DESTINATION + f'/wgan-{i}.png', normalize=True)
 
