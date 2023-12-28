@@ -20,7 +20,7 @@ DESTINATION = '../results/lsgan_results'
 ANNOTATIONS = '../images/healthy.csv'
 PATH = '../images/E_square_healthy'
 
-os.makedirs("images", exist_ok=True)
+os.makedirs(DESTINATION, exist_ok=True)
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--n_epochs", type=int, default=210, help="number of epochs of training")
