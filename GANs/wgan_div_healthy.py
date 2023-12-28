@@ -213,6 +213,6 @@ for epoch in range(opt.n_epochs):
 
             if epoch >= 200:
                 for i in range(50):
-                  save_image(fake_imgs.data[i:i+1], DESTINATION + f'/Healthy-wgan-{i}.jpg', normalize=True)
+                  save_image(fake_imgs.data[i:i+1], DESTINATION + f'/Healthy-wgan-{epoch}-{i}.jpg', normalize=True)
 
             batches_done += opt.n_critic
