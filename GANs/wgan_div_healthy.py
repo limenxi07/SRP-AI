@@ -18,9 +18,9 @@ import torch.autograd as autograd
 import torch
 
 DESTINATION = '../results/wgan_results'
-ANNOTATIONS = '../images/trainingset.csv'
-PATH = '../images/E_square_training_set'
-N_IMAGES = 50
+ANNOTATIONS = '../images/healthy.csv'
+PATH = '../images/E_square_healthy'
+N_IMAGES = 500
 
 os.makedirs(DESTINATION, exist_ok=True)
 
@@ -214,6 +214,6 @@ for epoch in range(opt.n_epochs):
 
             if epoch == opt.n_epochs - 1:
                 for i in range(N_IMAGES):
-                  save_image(fake_imgs.data[i:i+1], DESTINATION + f'/wgan-{i}.png', normalize=True)
+                  save_image(fake_imgs.data[i:i+1], DESTINATION + f'/Healthy-wgan-{i}.jpg', normalize=True)
 
             batches_done += opt.n_critic
