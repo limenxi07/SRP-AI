@@ -2,7 +2,6 @@ import argparse
 import os
 import numpy as np
 import math
-import sys
 import pandas as pd
 
 import torchvision.transforms as transforms
