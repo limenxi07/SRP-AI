@@ -24,7 +24,7 @@ PATH = '../images/F_square_rusted'
 os.makedirs(DESTINATION, exist_ok=True)
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--n_epochs", type=int, default=200, help="number of epochs of training")
+parser.add_argument("--n_epochs", type=int, default=210, help="number of epochs of training")
 parser.add_argument("--batch_size", type=int, default=64, help="size of the batches")
 parser.add_argument("--lr", type=float, default=0.0002, help="adam: learning rate")
 parser.add_argument("--b1", type=float, default=0.5, help="adam: decay of first order momentum of gradient")
@@ -36,7 +36,6 @@ parser.add_argument("--channels", type=int, default=1, help="number of image cha
 parser.add_argument("--n_critic", type=int, default=5, help="number of training steps for discriminator per iter")
 parser.add_argument("--clip_value", type=float, default=0.01, help="lower and upper clip value for disc. weights")
 parser.add_argument("--sample_interval", type=int, default=400, help="interval betwen image samples")
-parser.add_argument("--output", type=int, default=50)
 opt = parser.parse_args()
 print(opt)
 
@@ -212,8 +211,8 @@ for epoch in range(opt.n_epochs):
                 % (epoch, opt.n_epochs, i, len(dataloader), d_loss.item(), g_loss.item())
             )
 
-            if epoch == opt.n_epochs - 1:
-                for i in range(opt.output):
+            if epoch >= 200:
+                for i in range(50):
                   save_image(fake_imgs.data[i:i+1], DESTINATION + f'/rusted-wgan-{i}.jpg', normalize=True)
 
             batches_done += opt.n_critic
