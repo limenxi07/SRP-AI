@@ -179,7 +179,7 @@ def train_loop(config, model, noise_scheduler, optimizer, train_dataloader, lr_s
 # LAUNCH TRAINING
 args = (config, model, noise_scheduler, optimizer, train_dataloader, lr_scheduler)
 
-notebook_launcher(train_loop, args, num_processes=4)
+notebook_launcher(train_loop, args, num_processes=0)
 
 # SEE FINAL IMAGES
 sample_images = sorted(glob.glob(f"{config.output_dir}/samples/*.png"))
