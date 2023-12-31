@@ -23,8 +23,8 @@ class TrainingConfig:
     gradient_accumulation_steps = 1
     learning_rate = 1e-4
     lr_warmup_steps = 500
-    save_image_epochs = 50
-    save_model_epochs = 60 # not saving the model due to GitHub struggling with large file sizes
+    save_image_epochs = 200
+    save_model_epochs = 210 # not saving the model due to GitHub struggling with large file sizes
     mixed_precision = "fp16"  # `no` for float32, `fp16` for automatic mixed precision
     output_dir = "diffusion-rusted"  # the model name locally and on the HF Hub
 
@@ -179,4 +179,4 @@ def train_loop(config, model, noise_scheduler, optimizer, train_dataloader, lr_s
 # LAUNCH TRAINING
 args = (config, model, noise_scheduler, optimizer, train_dataloader, lr_scheduler)
 
-notebook_launcher(train_loop, args, num_processes=0)
+notebook_launcher(train_loop, args, num_processes=1)
