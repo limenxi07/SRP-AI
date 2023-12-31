@@ -2,7 +2,7 @@ from fastai.vision.all import *
 import os
 
 path = '../results'
-test = '../images/A_test_set'
+test = '../images/A_test_set/'
 gan_files = get_image_files('../results/gan_results')
 lsgan_files = get_image_files('../results/lsgan_results')
 wgan_files = get_image_files('../results/wgan_results')
