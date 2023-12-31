@@ -25,18 +25,18 @@ class TrainingConfig:
     learning_rate = 1e-4
     lr_warmup_steps = 500
     save_image_epochs = 10
-    save_model_epochs = 30
+    save_model_epochs = 60 # I chose to not save the model as the file size is too large for GitHub
     mixed_precision = "fp16"  # `no` for float32, `fp16` for automatic mixed precision
-    output_dir = "diffusion-model"  # the model name locally and on the HF Hub
+    output_dir = "../results/diffusion_rusted"  # the model name locally and on the HF Hub
 
     push_to_hub = False  # whether to upload the saved model to the HF Hub
     hub_private_repo = False
-    overwrite_output_dir = True  # overwrite the old model when re-running the notebook
+    overwrite_output_dir = True  # overwrite the old model when re-running 
     seed = 0
 config = TrainingConfig()
 
 # DATASET & PROCESSING
-dataset = load_dataset('imagefolder', data_dir='images')['train']
+dataset = load_dataset('imagefolder', data_dir='images/rusted')
 preprocess = transforms.Compose(
     [
         transforms.Resize((config.image_size, config.image_size)),
@@ -180,7 +180,3 @@ def train_loop(config, model, noise_scheduler, optimizer, train_dataloader, lr_s
 args = (config, model, noise_scheduler, optimizer, train_dataloader, lr_scheduler)
 
 notebook_launcher(train_loop, args, num_processes=0)
-
-# SEE FINAL IMAGES
-sample_images = sorted(glob.glob(f"{config.output_dir}/samples/*.png"))
-Image.open(sample_images[-1])
