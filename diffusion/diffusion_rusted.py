@@ -35,7 +35,7 @@ class TrainingConfig:
 config = TrainingConfig()
 
 # DATASET & PROCESSING
-dataset = load_dataset('imagefolder', data_dir='images/rusted')['train']
+dataset = load_dataset('imagefolder', data_dir='../images/F_square_rusted')['train']
 preprocess = transforms.Compose(
     [
         transforms.Resize((config.image_size, config.image_size)),
