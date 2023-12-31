@@ -152,7 +152,7 @@ def train_loop(config, model, noise_scheduler, optimizer, train_dataloader, lr_s
             with accelerator.accumulate(model):
                 # Predict the noise residual
                 noise_pred = model(noisy_images, timesteps, return_dict=False)[0]
-                loss = F.mse_loss(noise_pred, noise)
+                loss = torch.nn.functional.mse_loss(noise_pred, noise)
                 accelerator.backward(loss)
 
                 accelerator.clip_grad_norm_(model.parameters(), 1.0)
