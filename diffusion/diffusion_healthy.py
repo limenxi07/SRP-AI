@@ -101,7 +101,7 @@ def evaluate(config, epoch, pipeline):
     # image_grid = make_grid(images, rows=4, cols=4)
 
     # Save the images
-    test_dir = '../results/diffusion_healthy'
+    test_dir = '../results/diffusion_results'
     os.makedirs(test_dir, exist_ok=True)
     for i in range(len(images)):
       images[i].save(f"{test_dir}/Healthy-{i}.jpg")
