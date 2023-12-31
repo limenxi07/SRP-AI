@@ -105,7 +105,7 @@ def evaluate(config, epoch, pipeline):
     test_dir = os.path.join(config.output_dir, "samples")
     os.makedirs(test_dir, exist_ok=True)
     image_grid.save(f"{test_dir}/{epoch:04d}.png")
-    print('number of images: ' + len(images))
+    print('number of images: ', len(images))
 
 # MAIN TRAINING LOOP
 def train_loop(config, model, noise_scheduler, optimizer, train_dataloader, lr_scheduler):
