@@ -7,11 +7,11 @@ from models import *
 from experiment import VAEXperiment
 import torch.backends.cudnn as cudnn
 from lightning import Trainer
-from lightning.loggers import TensorBoardLogger
-from lightning.utilities.seed import seed_everything
-from lightning.callbacks import LearningRateMonitor, ModelCheckpoint
+from lightning.pytorch.loggers import TensorBoardLogger
+from lightning.pytorch.utilities.seed import seed_everything
+from lightning.pytorch.callbacks import LearningRateMonitor, ModelCheckpoint
 from dataset import VAEDataset
-from lightning.plugins import DDPPlugin
+from lightning.pytorch.plugins import DDPPlugin
 
 
 parser = argparse.ArgumentParser(description='Generic runner for VAE models')
