@@ -11,25 +11,18 @@ def label_func(f): return f[0].isupper()
 gan_dls = ImageDataLoaders.from_name_func(path, gan_files, label_func, item_tfms=Resize(128))
 lsgan_dls = ImageDataLoaders.from_name_func(path, lsgan_files, label_func, item_tfms=Resize(128))
 wgan_dls = ImageDataLoaders.from_name_func(path, wgan_files, label_func, item_tfms=Resize(128))
-print('loaded dataloaders')
+print('...loaded dataloaders')
 
 gan_learn = vision_learner(gan_dls, resnet34, metrics=accuracy)
 gan_learn.fine_tune(5)
-print('trained gan model')
-
 lsgan_learn = vision_learner(lsgan_dls, resnet34, metrics=accuracy)
 lsgan_learn.fine_tune(5)
-print('trained lsgan model')
-
 wgan_learn = vision_learner(wgan_dls, resnet34, metrics=accuracy)
 wgan_learn.fine_tune(5)
-print('trained wgan model')
 
 def test_accuracy(learner, model):
   results = 0
   healthy = 0
-
-  print('starting tests for ' + model)
 
   for image in os.scandir(test):
     if str(image)[11].isupper() and learner.predict(test + str(image)[11:-2])[0] == 'True':

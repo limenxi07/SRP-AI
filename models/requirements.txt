@@ -1,0 +1,4 @@
+fastai
+numpy
+matplotlib
+pillow
