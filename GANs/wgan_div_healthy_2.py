@@ -19,7 +19,7 @@ import torch
 
 DESTINATION = '../results/wgan_results_2'
 ANNOTATIONS = '../images/healthy2.csv'
-PATH = '../images/H_square_healthy_2'
+PATH = '../images/G_square_healthy_2'
 
 os.makedirs(DESTINATION, exist_ok=True)
 
