@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import List, Optional, Sequence, Union, Any, Callable
 from torchvision.datasets.folder import default_loader
 from torchvision.io import read_image
-from pytorch_lightning import LightningDataModule
+from lightning import LightningDataModule
 from torch.utils.data import DataLoader, Dataset
 from torchvision import transforms
 from torchvision.datasets import CelebA
