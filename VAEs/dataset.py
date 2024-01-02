@@ -7,6 +7,7 @@ from torchvision.datasets.folder import default_loader
 from torchvision.io import read_image
 from lightning import LightningDataModule
 from torch.utils.data import DataLoader, Dataset
+from torchvision.transforms import transforms
 import zipfile
 import pandas as pd
 
@@ -54,7 +55,9 @@ class VAEDataset(LightningDataModule):
         self.pin_memory = pin_memory # whether prepared items should be loaded into pinned memory
 
     def setup(self, stage: Optional[str] = None) -> None:
-        transform = None
+        transform = transforms.Compose(
+            [transforms.ToTensor(), transforms.ToPILImage()]
+        ),
         
         self.train_dataset = MyDataset(
             data_dir=self.data_dir,
