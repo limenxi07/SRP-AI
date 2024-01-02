@@ -82,7 +82,7 @@ class VanillaVAE(BaseVAE):
         :return: (Tensor) List of latent codes
         """
         result = self.encoder(input)
-        result = torch.flatten(result, start_dim=1)
+        result = torch.flatten(result, start_dim=3)
 
         # Split the result into mu and var components
         # of the latent Gaussian distribution
