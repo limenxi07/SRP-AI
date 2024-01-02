@@ -56,7 +56,7 @@ class VAEDataset(LightningDataModule):
         self.pin_memory = pin_memory # whether prepared items should be loaded into pinned memory
 
     def setup(self, stage: Optional[str] = None) -> None:
-        transform = transforms.Compose([transforms.Resize(self.patch_size), transforms.ToTensor(), transforms.Normalize([0.5], [0.5])])
+        transform = transforms.Compose(transforms.Normalize([0.5], [0.5]))
         
         self.train_dataset = MyDataset(
             data_dir=self.data_dir,
