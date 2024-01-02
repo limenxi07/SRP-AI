@@ -88,7 +88,7 @@ class VanillaVAE(BaseVAE):
         # of the latent Gaussian distribution
         print("TROUBLESHOOTING")
         print(result.shape)
-        print(self.fc_mu.shape)
+        print(self.fc_mu(result).shape)
         mu = self.fc_mu(result)
         log_var = self.fc_var(result)
 
