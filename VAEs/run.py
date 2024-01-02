@@ -10,7 +10,7 @@ from lightning import Trainer
 from lightning.pytorch.loggers import TensorBoardLogger
 from lightning.pytorch.callbacks import LearningRateMonitor, ModelCheckpoint
 from dataset import VAEDataset
-from lightning.pytorch.strategies import DDPStrategy
+from lightning.pytorch import LightningModule
 
 
 parser = argparse.ArgumentParser(description='Generic runner for VAE models')

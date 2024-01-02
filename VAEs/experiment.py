@@ -23,6 +23,7 @@ class VAEXperiment(pl.LightningModule):
         self.params = params
         self.curr_device = None
         self.hold_graph = False
+        self.automatic_optimization = False
         try:
             self.hold_graph = self.params['retain_first_backpass']
         except:
@@ -31,19 +32,20 @@ class VAEXperiment(pl.LightningModule):
     def forward(self, input: Tensor, **kwargs) -> Tensor:
         return self.model(input, **kwargs)
 
-    def training_step(self, batch, batch_idx, optimizer_idx = 0):
+    def training_step(self, batch, batch_idx):
+        opt = self.optimizers()
+        opt.zero_grad()
+        loss = self.compute_loss(batch)
+        self.manual_backward(loss)
+        opt.step()
+
         real_img, labels = batch
         self.curr_device = real_img.device
 
         results = self.forward(real_img, labels = labels)
-        train_loss = self.model.loss_function(*results,
-                                              M_N = self.params['kld_weight'], #al_img.shape[0]/ self.num_train_imgs,
-                                              optimizer_idx=optimizer_idx,
-                                              batch_idx = batch_idx)
+        self.log_dict({key: val.item() for key, val in loss.items()}, sync_dist=True)
 
-        self.log_dict({key: val.item() for key, val in train_loss.items()}, sync_dist=True)
-
-        return train_loss['loss']
+        return loss['loss']
 
     def validation_step(self, batch, batch_idx, optimizer_idx = 0):
         real_img, labels = batch
