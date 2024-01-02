@@ -56,7 +56,7 @@ class VAEDataset(LightningDataModule):
 
     def setup(self, stage: Optional[str] = None) -> None:
         transform = transforms.Compose(
-            [transforms.ToPILImage(), transforms.ToTensor()]
+            [transforms.ToPILImage(), transforms.ToTensor(), transforms.Normalize([0.5], [0.5])]
         )
         
         self.train_dataset = MyDataset(
