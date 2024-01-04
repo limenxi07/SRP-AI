@@ -2,6 +2,7 @@ import os
 
 import imageio
 import matplotlib.pyplot as plt
+import numpy as np
 import torch
 from pythae.data.datasets import DatasetOutput
 from pythae.models import VAE, AutoModel, VAEConfig
