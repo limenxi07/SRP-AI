@@ -187,7 +187,7 @@ for epoch in trange(start_epoch, args.nepoch, leave=False):
             with torch.no_grad():
                 with torch.cuda.amp.autocast():
                     recon_img, mu, log_var = vae_net(test_images.to(device))
-                    for i, image in enumerate(test_images):
+                    for i, image in enumerate(recon_img):
                         vutils.save_image(image, f'{args.img_dir}/Healthy-{epoch}-{i}.jpg')
                     # img_cat = torch.cat((recon_img.cpu(), test_images), 2).float()
                     # vutils.save_image(img_cat, f'{img_dir}/Healthy-{epoch}.jpg', normalize=True)
