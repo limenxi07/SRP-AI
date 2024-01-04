@@ -16,18 +16,16 @@ import Helpers as hf
 from vgg19 import VGG19
 from RES_VAE_Dynamic import VAE
 
-img_dir = '../results/vae_healthy'
-os.makedirs(img_dir, exist_ok=True)
-
 parser = argparse.ArgumentParser(description="Training Params")
 # string args
 parser.add_argument("--model_name", "-mn", help="Experiment save name", type=str, required=True)
 parser.add_argument("--dataset_root", "-dr", help="Dataset root dir", type=str, required=True)
+parser.add_argument("--img_dir", help="Directory for saving synthetic images", type=str, required=True)
 
 parser.add_argument("--save_dir", "-sd", help="Root dir for saving model and data", type=str, default=".")
 
 # int args
-parser.add_argument("--nepoch", help="Number of training epochs", type=int, default=5)
+parser.add_argument("--nepoch", help="Number of training epochs", type=int, default=600)
 parser.add_argument("--batch_size", "-bs", help="Training batch size", type=int, default=128)
 parser.add_argument("--image_size", '-ims', help="Input image size", type=int, default=64)
 parser.add_argument("--ch_multi", '-w', help="Channel width multiplier", type=int, default=64)
@@ -49,6 +47,8 @@ args = parser.parse_args()
 
 use_cuda = torch.cuda.is_available()
 device = torch.device(args.device_index if use_cuda else "cpu")
+os.makedirs(args.img_dir, exist_ok=True)
+
 print("")
 
 # Create dataloaders
@@ -181,14 +181,14 @@ for epoch in trange(start_epoch, args.nepoch, leave=False):
         data_logger["kl_loss"].append(kl_loss.item())
         data_logger["img_mse"].append(mse_loss.item())
 
-        # Save 500 images over the last 500 epochs
-        if epoch >= 0:
+        # Save 500 images over the last 100 epochs
+        if epoch >= args.nepoch - 100:
             vae_net.eval()
             with torch.no_grad():
                 with torch.cuda.amp.autocast():
                     recon_img, mu, log_var = vae_net(test_images.to(device))
                     for i, image in enumerate(test_images):
-                        vutils.save_image(image, f'{img_dir}/Healthy-{epoch}-{i}.jpg')
+                        vutils.save_image(image, f'{args.img_dir}/Healthy-{epoch}-{i}.jpg')
                     # img_cat = torch.cat((recon_img.cpu(), test_images), 2).float()
                     # vutils.save_image(img_cat, f'{img_dir}/Healthy-{epoch}.jpg', normalize=True)
         # Save results and a checkpoint at regular intervals

@@ -1,4 +1,2 @@
-pythae
-matplotlib
-numpy
-hostlist
+torch
+torchvision
