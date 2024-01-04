@@ -186,8 +186,9 @@ for epoch in trange(start_epoch, args.nepoch, leave=False):
             vae_net.eval()
             with torch.no_grad():
                 with torch.cuda.amp.autocast():
-                    print('LEN', len(recon_img))
-                    # recon_img, mu, log_var = vae_net(test_images.to(device))
+                    recon_img, mu, log_var = vae_net(test_images.to(device))
+                    print('RECON: ', len(recon_img))
+                    print('test: ', len(test_images))
                     # img_cat = torch.cat((recon_img.cpu(), test_images), 2).float()
                     # vutils.save_image(img_cat, f'{img_dir}/Healthy-{epoch}.jpg', normalize=True)
         # Save results and a checkpoint at regular intervals
