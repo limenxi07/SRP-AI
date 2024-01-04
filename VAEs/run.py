@@ -81,8 +81,8 @@ pipeline(
     train_data=train_dataset,
     eval_data=eval_dataset
 )
-last_training = sorted(os.listdir('my_model'))[-1]
-trained_model = AutoModel.load_from_folder(os.path.join('my_model', last_training, 'final_model'))
+last_training = sorted(os.listdir(output))[-1]
+trained_model = AutoModel.load_from_folder(os.path.join(output, last_training, 'final_model'))
 # create normal sampler
 normal_samper = NormalSampler(
     model=trained_model
@@ -124,6 +124,7 @@ for i in range(5):
         axes[i][j].imshow(gen_data[i*5 +j].cpu().squeeze(0), cmap='gray')
         axes[i][j].axis('off')
 plt.tight_layout(pad=0.)
+plt.savefig('results.jpg')
 reconstructions = trained_model.reconstruct(eval_dataset[:25].to(device)).detach().cpu()
 # show reconstructions
 fig, axes = plt.subplots(nrows=5, ncols=5, figsize=(10, 10))
@@ -133,6 +134,7 @@ for i in range(5):
         axes[i][j].imshow(reconstructions[i*5 + j].cpu().squeeze(0), cmap='gray')
         axes[i][j].axis('off')
 plt.tight_layout(pad=0.)
+plt.savefig('reconstructions.jpg')
 # show the true data
 fig, axes = plt.subplots(nrows=5, ncols=5, figsize=(10, 10))
 
@@ -141,6 +143,7 @@ for i in range(5):
         axes[i][j].imshow(eval_dataset[i*5 +j].cpu().squeeze(0), cmap='gray')
         axes[i][j].axis('off')
 plt.tight_layout(pad=0.)
+plt.savefig('true_data.jpg')
 interpolations = trained_model.interpolate(eval_dataset[:5].to(device), eval_dataset[5:10].to(device), granularity=10).detach().cpu()
 # show interpolations
 fig, axes = plt.subplots(nrows=5, ncols=10, figsize=(10, 5))
@@ -150,3 +153,4 @@ for i in range(5):
         axes[i][j].imshow(interpolations[i, j].cpu().squeeze(0), cmap='gray')
         axes[i][j].axis('off')
 plt.tight_layout(pad=0.)
+plt.savefig('interpolations.jpg')
