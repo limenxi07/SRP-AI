@@ -21,6 +21,7 @@ parser = argparse.ArgumentParser(description="Training Params")
 parser.add_argument("--model_name", "-mn", help="Experiment save name", type=str, required=True)
 parser.add_argument("--dataset_root", "-dr", help="Dataset root dir", type=str, required=True)
 parser.add_argument("--img_dir", help="Directory for saving synthetic images", type=str, required=True)
+parser.add_argument("--type", type=str, required=True)
 
 parser.add_argument("--save_dir", "-sd", help="Root dir for saving model and data", type=str, default=".")
 
@@ -188,7 +189,7 @@ for epoch in trange(start_epoch, args.nepoch, leave=False):
                 with torch.cuda.amp.autocast():
                     recon_img, mu, log_var = vae_net(test_images.to(device))
                     for i, image in enumerate(recon_img):
-                        vutils.save_image(image, f'{args.img_dir}/Healthy-{epoch}-{i}.jpg')
+                        vutils.save_image(image, f'{args.img_dir}/{args.type}-{epoch}-{i}.jpg')
                 if os.path.isfile(args.save_dir + "/Models/" + save_file_name + ".pt"):
                     shutil.copyfile(src=args.save_dir + "/Models/" + save_file_name + ".pt",
                                     dst=args.save_dir + "/Models/" + save_file_name + "_copy.pt")
