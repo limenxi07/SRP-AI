@@ -27,7 +27,7 @@ parser.add_argument("--dataset_root", "-dr", help="Dataset root dir", type=str, 
 parser.add_argument("--save_dir", "-sd", help="Root dir for saving model and data", type=str, default=".")
 
 # int args
-parser.add_argument("--nepoch", help="Number of training epochs", type=int, default=10)
+parser.add_argument("--nepoch", help="Number of training epochs", type=int, default=5)
 parser.add_argument("--batch_size", "-bs", help="Training batch size", type=int, default=128)
 parser.add_argument("--image_size", '-ims', help="Input image size", type=int, default=64)
 parser.add_argument("--ch_multi", '-w', help="Channel width multiplier", type=int, default=64)
@@ -186,7 +186,7 @@ for epoch in trange(start_epoch, args.nepoch, leave=False):
             vae_net.eval()
             with torch.no_grad():
                 with torch.cuda.amp.autocast():
-                    print('IMG', recon_img)
+                    print('LEN', len(recon_img))
                     # recon_img, mu, log_var = vae_net(test_images.to(device))
                     # img_cat = torch.cat((recon_img.cpu(), test_images), 2).float()
                     # vutils.save_image(img_cat, f'{img_dir}/Healthy-{epoch}.jpg', normalize=True)
