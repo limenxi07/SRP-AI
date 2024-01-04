@@ -16,6 +16,9 @@ import Helpers as hf
 from vgg19 import VGG19
 from RES_VAE_Dynamic import VAE
 
+img_dir = '../results/vae_healthy'
+os.makedirs(img_dir, exist_ok=True)
+
 parser = argparse.ArgumentParser(description="Training Params")
 # string args
 parser.add_argument("--model_name", "-mn", help="Experiment save name", type=str, required=True)
@@ -185,7 +188,7 @@ for epoch in trange(start_epoch, args.nepoch, leave=False):
                 with torch.cuda.amp.autocast():
                     recon_img, mu, log_var = vae_net(test_images.to(device))
                     img_cat = torch.cat((recon_img.cpu(), test_images), 2).float()
-                    vutils.save_image(img_cat, f'.jpg', normalize=True)
+                    vutils.save_image(img_cat, f'{img_dir}/Healthy-{epoch}.jpg', normalize=True)
         # Save results and a checkpoint at regular intervals
         if (current_iter + 1) % args.save_interval == 0:
             # In eval mode the model will use mu as the encoding instead of sampling from the distribution
