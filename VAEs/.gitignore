@@ -1,11 +1,2 @@
-
-Data/
-logs/
-
-VanillaVAE/version_0/
-
-__pycache__/
-.ipynb_checkpoints/
-
 .venv/
-.vae/
+__pycache__/

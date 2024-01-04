@@ -1,59 +1,152 @@
 import os
-import yaml
-import argparse
-import numpy as np
-from pathlib import Path
-from models import *
-from experiment import VAEXperiment
-import torch.backends.cudnn as cudnn
-from lightning import Trainer
-from lightning.pytorch.loggers import TensorBoardLogger
-from lightning.pytorch.callbacks import LearningRateMonitor, ModelCheckpoint
-from dataset import VAEDataset
-from lightning.pytorch import LightningModule
+
+import matplotlib.pyplot as plt
+import torch
+from torchvision import datasets, transforms
+
+from pythae.data.datasets import DatasetOutput
+from pythae.models import VAE, AutoModel, VAEConfig
+from pythae.models.nn.benchmarks.mnist import (Decoder_ResNet_AE_MNIST,
+                                               Encoder_ResNet_VAE_MNIST)
+from pythae.pipelines.training import TrainingPipeline
+from pythae.samplers import (GaussianMixtureSampler,
+                             GaussianMixtureSamplerConfig, NormalSampler)
+from pythae.trainers import BaseTrainerConfig
+
+path = 'images'
+output = 'vae_healthy'
+
+class MyCustomDataset(datasets.ImageFolder):
+
+    def __init__(self, root, transform=None, target_transform=None):
+        super().__init__(root=root, transform=transform, target_transform=target_transform)
+
+    def __getitem__(self, index):
+        X, _ = super().__getitem__(index)
+
+        return DatasetOutput(
+            data=X
+        )
+
+data_transform = transforms.Compose([
+    transforms.Grayscale(num_output_channels=3),
+    transforms.ToTensor() # the data must be tensors
+])
+
+train_dataset = MyCustomDataset(
+    root=path,
+    transform=data_transform,
+)
+
+eval_dataset = MyCustomDataset(
+    root=path, 
+    transform=data_transform
+)
+
+device = "cuda" if torch.cuda.is_available() else "cpu"
+
+trainset = datasets.MNIST(root='../../data', train=True, download=True, transform=None)
+
+train_dataset = trainset.data[:-10000].reshape(-1, 1, 28, 28) / 255.
+eval_dataset = trainset.data[-10000:].reshape(-1, 1, 28, 28) / 255.
+
+config = BaseTrainerConfig(
+    output_dir=output,
+    learning_rate=1e-4,
+    per_device_train_batch_size=64,
+    per_device_eval_batch_size=64,
+    num_epochs=10, 
+    optimizer_cls="AdamW",
+    optimizer_params={"weight_decay": 0.05, "betas": (0.91, 0.99)}
+)
 
 
-parser = argparse.ArgumentParser(description='Generic runner for VAE models')
-parser.add_argument('--config',  '-c',
-                    dest="filename",
-                    metavar='FILE',
-                    help =  'path to the config file',
-                    default='configs/vae.yaml')
+model_config = VAEConfig(
+    input_dim=(3, 128, 128),
+    latent_dim=16
+)
 
-args = parser.parse_args()
-with open(args.filename, 'r') as file:
-    try:
-        config = yaml.safe_load(file)
-    except yaml.YAMLError as exc:
-        print(exc)
+model = VAE(
+    model_config=model_config,
+    encoder=Encoder_ResNet_VAE_MNIST(model_config), 
+    decoder=Decoder_ResNet_AE_MNIST(model_config) 
+)
 
+pipeline = TrainingPipeline(
+    training_config=config,
+    model=model
+)
 
-tb_logger =  TensorBoardLogger(save_dir=config['logging_params']['save_dir'],
-                               name=config['model_params']['name'],)
+pipeline(
+    train_data=train_dataset,
+    eval_data=eval_dataset
+)
+last_training = sorted(os.listdir('my_model'))[-1]
+trained_model = AutoModel.load_from_folder(os.path.join('my_model', last_training, 'final_model'))
+# create normal sampler
+normal_samper = NormalSampler(
+    model=trained_model
+)
+# sample
+gen_data = normal_samper.sample(
+    num_samples=25
+)
+# show results with normal sampler
+fig, axes = plt.subplots(nrows=5, ncols=5, figsize=(10, 10))
 
-# For reproducibility
-model = vae_models[config['model_params']['name']](**config['model_params'])
-experiment = VAEXperiment(model,
-                          config['exp_params'])
+for i in range(5):
+    for j in range(5):
+        axes[i][j].imshow(gen_data[i*5 +j].cpu().squeeze(0), cmap='gray')
+        axes[i][j].axis('off')
+plt.tight_layout(pad=0.)
+# set up GMM sampler config
+gmm_sampler_config = GaussianMixtureSamplerConfig(
+    n_components=10
+)
 
-data = VAEDataset(**config["data_params"], pin_memory=config['trainer_params']['devices'] != 0)
+# create gmm sampler
+gmm_sampler = GaussianMixtureSampler(
+    sampler_config=gmm_sampler_config,
+    model=trained_model
+)
 
-data.setup()
-runner = Trainer(logger=tb_logger,
-                 callbacks=[
-                     LearningRateMonitor(),
-                     ModelCheckpoint(save_top_k=2, 
-                                     dirpath =os.path.join(tb_logger.log_dir , "checkpoints"), 
-                                     monitor= "val_loss",
-                                     save_last= True),
-                 ],
-                 strategy="ddp",
-                 **config['trainer_params'])
+# fit the sampler
+gmm_sampler.fit(train_dataset)
+# sample
+gen_data = gmm_sampler.sample(
+    num_samples=25
+)
+# show results with gmm sampler
+fig, axes = plt.subplots(nrows=5, ncols=5, figsize=(10, 10))
 
+for i in range(5):
+    for j in range(5):
+        axes[i][j].imshow(gen_data[i*5 +j].cpu().squeeze(0), cmap='gray')
+        axes[i][j].axis('off')
+plt.tight_layout(pad=0.)
+reconstructions = trained_model.reconstruct(eval_dataset[:25].to(device)).detach().cpu()
+# show reconstructions
+fig, axes = plt.subplots(nrows=5, ncols=5, figsize=(10, 10))
 
-Path(f"{tb_logger.log_dir}/Samples").mkdir(exist_ok=True, parents=True)
-Path(f"{tb_logger.log_dir}/Reconstructions").mkdir(exist_ok=True, parents=True)
+for i in range(5):
+    for j in range(5):
+        axes[i][j].imshow(reconstructions[i*5 + j].cpu().squeeze(0), cmap='gray')
+        axes[i][j].axis('off')
+plt.tight_layout(pad=0.)
+# show the true data
+fig, axes = plt.subplots(nrows=5, ncols=5, figsize=(10, 10))
 
+for i in range(5):
+    for j in range(5):
+        axes[i][j].imshow(eval_dataset[i*5 +j].cpu().squeeze(0), cmap='gray')
+        axes[i][j].axis('off')
+plt.tight_layout(pad=0.)
+interpolations = trained_model.interpolate(eval_dataset[:5].to(device), eval_dataset[5:10].to(device), granularity=10).detach().cpu()
+# show interpolations
+fig, axes = plt.subplots(nrows=5, ncols=10, figsize=(10, 5))
 
-print(f"======= Training {config['model_params']['name']} =======")
-runner.fit(experiment, datamodule=data)
+for i in range(5):
+    for j in range(10):
+        axes[i][j].imshow(interpolations[i, j].cpu().squeeze(0), cmap='gray')
+        axes[i][j].axis('off')
+plt.tight_layout(pad=0.)
