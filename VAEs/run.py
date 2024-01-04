@@ -25,26 +25,21 @@ train_targets = mnist_trainset.targets[:10000]
 eval_dataset = mnist_trainset.data[-10000:].reshape(-1, 1, 28, 28) / 255.
 eval_targets = mnist_trainset.targets[-10000:]
 
-if not os.path.exists("data_folders"):
-    os.mkdir("data_folders")
-if not os.path.exists("data_folders/train"):
-    os.mkdir("data_folders/train")
-if not os.path.exists("data_folders/eval"):
-    os.mkdir("data_folders/eval")
+for i in range(len(train_dataset)):
+    img = 255.0*train_dataset[i][0].unsqueeze(-1)
+    img_folder = os.path.join("images", "healthy", f"{train_targets[i]}")
+    if not os.path.exists(img_folder):
+        os.mkdir(img_folder)
+    imageio.imwrite(os.path.join(img_folder, "%08d.jpg" % i), np.repeat(img, repeats=3, axis=-1).type(torch.uint8))
+    print('train: ', i)
 
-# for i in range(len(train_dataset)):
-#     img = 255.0*train_dataset[i][0].unsqueeze(-1)
-#     img_folder = os.path.join("data_folders", "train", f"{train_targets[i]}")
-#     if not os.path.exists(img_folder):
-#         os.mkdir(img_folder)
-#     imageio.imwrite(os.path.join(img_folder, "%08d.jpg" % i), np.repeat(img, repeats=3, axis=-1).type(torch.uint8))
-
-# for i in range(len(eval_dataset)):
-#     img = 255.0*eval_dataset[i][0].unsqueeze(-1)
-#     img_folder = os.path.join("data_folders", "eval", f"{eval_targets[i]}")
-#     if not os.path.exists(img_folder):
-#         os.mkdir(img_folder)
-#     imageio.imwrite(os.path.join(img_folder, "%08d.jpg" % i), np.repeat(img, repeats=3, axis=-1).type(torch.uint8))
+for i in range(len(eval_dataset)):
+    img = 255.0*eval_dataset[i][0].unsqueeze(-1)
+    img_folder = os.path.join("images", "healthy", f"{eval_targets[i]}")
+    if not os.path.exists(img_folder):
+        os.mkdir(img_folder)
+    imageio.imwrite(os.path.join(img_folder, "%08d.jpg" % i), np.repeat(img, repeats=3, axis=-1).type(torch.uint8))
+    print('test: ', i)
 
 data_transform = transforms.Compose([
     transforms.Grayscale(num_output_channels=3),
