@@ -11,11 +11,16 @@ from torch.utils.data import Dataset
 from torchvision import transforms
 
 from pythae.data.datasets import DatasetOutput
-from pythae.models import VQVAE, VQVAEConfig
+from pythae.models import VQVAE, AutoModel, VQVAEConfig
 from pythae.models.base.base_utils import ModelOutput
 from pythae.models.nn.base_architectures import BaseDecoder, BaseEncoder
 from pythae.models.nn.benchmarks.utils import ResBlock
 from pythae.trainers import BaseTrainer, BaseTrainerConfig
+from pythae.samplers import PixelCNNSampler, PixelCNNSamplerConfig
+from pythae.pipelines import GenerationPipeline
+import matplotlib.pyplot as plt
+device = "cuda" if torch.cuda.is_available() else "cpu"
+output = 'models/vae_healthy'
 
 logger = logging.getLogger(__name__)
 console = logging.StreamHandler()
@@ -44,6 +49,20 @@ ap.add_argument(
 )
 
 args = ap.parse_args()
+
+training_config = BaseTrainerConfig(
+        num_epochs=1,
+        train_dataloader_num_workers=8,
+        eval_dataloader_num_workers=8,
+        output_dir=output,
+        per_device_train_batch_size=128,
+        per_device_eval_batch_size=128,
+        learning_rate=1e-4,
+        steps_saving=None,
+        steps_predict=None,
+        no_cuda=False,
+        dist_backend="nccl",
+    )
 
 
 class Encoder_ResNet_VQVAE_ImageNet(BaseEncoder):
@@ -118,6 +137,12 @@ class CustomDataset(Dataset):
         if self.transforms is not None:
             img = self.transforms(img)
         return DatasetOutput(data=img)
+    
+    def max(self):
+        return len(self.imgs_path)
+    
+    def min(self):
+        return 1
 
 
 def main(args):
@@ -127,11 +152,11 @@ def main(args):
     )
 
     train_dataset = CustomDataset(
-        data_dir="images",
+        data_dir="images/healthy",
         transforms=img_transforms,
     )
     eval_dataset = CustomDataset(
-        data_dir="images",
+        data_dir="images/healthy",
         transforms=img_transforms,
     )
 
@@ -143,31 +168,6 @@ def main(args):
     decoder = Decoder_ResNet_VQVAE_ImageNet(model_config)
 
     model = VQVAE(model_config=model_config, encoder=encoder, decoder=decoder)
-
-    gpu_ids = os.environ["SLURM_STEP_GPUS"].split(",")
-
-    training_config = BaseTrainerConfig(
-        num_epochs=20,
-        train_dataloader_num_workers=8,
-        eval_dataloader_num_workers=8,
-        output_dir="vae_healthy",
-        per_device_train_batch_size=128,
-        per_device_eval_batch_size=128,
-        learning_rate=1e-4,
-        steps_saving=None,
-        steps_predict=None,
-        no_cuda=False,
-        world_size=int(os.environ["SLURM_NTASKS"]),
-        dist_backend="nccl",
-        rank=int(os.environ["SLURM_PROCID"]),
-        local_rank=int(os.environ["SLURM_LOCALID"]),
-        master_addr=hostlist.expand_hostlist(os.environ["SLURM_JOB_NODELIST"])[0],
-        master_port=str(12345 + int(min(gpu_ids))),
-    )
-
-    if int(os.environ["SLURM_PROCID"]) == 0:
-        logger.info(model)
-        logger.info(f"Training config: {training_config}\n")
 
     callbacks = []
 
@@ -200,6 +200,21 @@ def main(args):
     end_time = time.time()
 
     logger.info(f"Total execution time: {(end_time - start_time)} seconds")
+
+
+  # GENERATE IMAGES
+    last_training = sorted(os.listdir(output))[-1]
+    trained_model = AutoModel.load_from_folder(os.path.join(output, last_training, 'final_model'))
+    sampler_config = PixelCNNSamplerConfig(
+      n_layers=10
+    )
+    pixelcnn_sampler = PixelCNNSampler(
+        sampler_config=sampler_config,
+        model=trained_model
+    )
+    # pixelcnn_sampler.fit(train_dataset.data)
+    # samples = pixelcnn_sampler.sample(num_samples=10)
+    print(train_dataset)
 
 
 if __name__ == "__main__":
