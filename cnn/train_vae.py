@@ -178,6 +178,14 @@ for epoch in trange(start_epoch, args.nepoch, leave=False):
         data_logger["kl_loss"].append(kl_loss.item())
         data_logger["img_mse"].append(mse_loss.item())
 
+        # Save 500 images over the last 500 epochs
+        if epoch >= 1500:
+            vae_net.eval()
+            with torch.no_grad():
+                with torch.cuda.amp.autocast():
+                    recon_img, mu, log_var = vae_net(test_images.to(device))
+                    img_cat = torch.cat((recon_img.cpu(), test_images), 2).float()
+                    vutils.save_image(img_cat, f'.jpg', normalize=True)
         # Save results and a checkpoint at regular intervals
         if (current_iter + 1) % args.save_interval == 0:
             # In eval mode the model will use mu as the encoding instead of sampling from the distribution
@@ -189,13 +197,13 @@ for epoch in trange(start_epoch, args.nepoch, leave=False):
                     data_logger['test_mse_loss'].append(F.mse_loss(recon_img,
                                                                    test_images.to(device)).item())
 
-                    img_cat = torch.cat((recon_img.cpu(), test_images), 2).float()
-                    vutils.save_image(img_cat,
-                                      "%s/%s/%s_%d_test.png" % (args.save_dir,
-                                                                "Results",
-                                                                args.model_name,
-                                                                args.image_size),
-                                      normalize=True)
+                    # img_cat = torch.cat((recon_img.cpu(), test_images), 2).float()
+                    # vutils.save_image(img_cat,
+                    #                   "%s/%s/%s_%d_test.png" % (args.save_dir,
+                    #                                             "Results",
+                    #                                             args.model_name,
+                    #                                             args.image_size),
+                    #                   normalize=True)
 
                 # Keep a copy of the previous save in case we accidentally save a model that has exploded...
                 if os.path.isfile(args.save_dir + "/Models/" + save_file_name + ".pt"):
@@ -212,3 +220,4 @@ for epoch in trange(start_epoch, args.nepoch, leave=False):
 
                 # Set the model back into training mode!!
                 vae_net.train()
+        
