@@ -181,7 +181,7 @@ for epoch in trange(start_epoch, args.nepoch, leave=False):
         data_logger["kl_loss"].append(kl_loss.item())
         data_logger["img_mse"].append(mse_loss.item())
 
-        # Save 500 images over the last 100 epochs
+        # # Save 500 images over the last 100 epochs
         if epoch >= args.nepoch - 100:
             vae_net.eval()
             with torch.no_grad():
@@ -189,6 +189,11 @@ for epoch in trange(start_epoch, args.nepoch, leave=False):
                     recon_img, mu, log_var = vae_net(test_images.to(device))
                     for i, image in enumerate(recon_img):
                         vutils.save_image(image, f'{args.img_dir}/Healthy-{epoch}-{i}.jpg')
+                if os.path.isfile(args.save_dir + "/Models/" + save_file_name + ".pt"):
+                    shutil.copyfile(src=args.save_dir + "/Models/" + save_file_name + ".pt",
+                                    dst=args.save_dir + "/Models/" + save_file_name + "_copy.pt")
+                vae_net.train()
+
                     # img_cat = torch.cat((recon_img.cpu(), test_images), 2).float()
                     # vutils.save_image(img_cat, f'{img_dir}/Healthy-{epoch}.jpg', normalize=True)
         # Save results and a checkpoint at regular intervals
