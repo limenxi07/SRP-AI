@@ -182,8 +182,8 @@ for epoch in trange(start_epoch, args.nepoch, leave=False):
         data_logger["kl_loss"].append(kl_loss.item())
         data_logger["img_mse"].append(mse_loss.item())
 
-        # # Save 500 images over the last 100 epochs
-        if epoch >= args.nepoch - 100:
+        # # Save 500 images over the last 10 epochs
+        if epoch >= args.nepoch - 10:
             vae_net.eval()
             with torch.no_grad():
                 with torch.cuda.amp.autocast():
